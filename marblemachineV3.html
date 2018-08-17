@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+	<meta charset="utf-8">
+	<title>The Marble Machine</title>
+
+	<style>
+
+		h1 {
+			color: black;
+			text-align: center;
+		}
+
+		h3 {
+			color: black;
+			text-align: center;
+		}
+
+		button {
+			margin: auto;
+			padding: 10px;
+		}
+
+		form {
+			margin: auto;
+			padding: 15px;
+		}
+
+		#user_input {
+			width: 100%;
+			height: 160px;
+			background-color: #909090;
+			text-align: center;
+		}
+
+		#optionButtons {
+			display: flex;
+			justify-content: center;
+		}
+
+		.optionButton {
+			padding: 5px;
+		}
+
+		.circle {
+		    background: #ff0;
+		    width: 50px;
+		    height: 50px;
+		    border-radius: 50%;
+		    margin: 20px;
+		    float: left;
+		}
+
+		.row {
+			width: 100%;
+    		height: 90px;
+    		display: flex;
+    		justify-content: center;
+		}
+
+		.genInstruct {
+			font-style: italic;
+		}
+
+	</style>
+
+	<script>
+
+		function generateMarbles(){
+
+			//Obtain User Input
+			var user_num = document.getElementById("user_form");
+			var n = Number(user_num.elements[0].value);
+
+			//Clear Existing Marbles
+			clearMarbles();
+
+			//Obtain String Array of Permutations
+			var perms = get_perms(n);
+
+			//Raise value of every element by one
+			for (i = 0; i < perms.length; i++){
+				var temp_string = perms[i];
+				var new_string = new String();
+				for (j = 0; j < temp_string.length; j++){
+					var temp_number = Number(temp_string[j]);
+					temp_number = temp_number + 1;
+					new_string = new_string += temp_number.toString();
+				}
+				perms[i] = new_string;
+			}
+
+			//Add zeros to every permutation that is less than n-long
+			for (i = 0; i < perms.length; i++){
+				var temp_string = perms[i];
+				for (j = 0; j < n - temp_string.length; j++){
+					temp_string = temp_string += "0";
+				}
+				perms[i] = temp_string;
+			}
+
+			// //Obtain 2D Color Array 
+			var color_array = new Array(perms.length);
+			for (i = 0; i < perms.length; i++) {
+			  color_array[i] = new Array(n);
+			}
+
+			//Populate 2D Color array by converting perms from strings to numbers
+			for (j = 0; j < perms.length; j++){
+				for (i = 0; i < n; i++){
+					perm = perms[j];
+					color_array[j][i] = Number(perm[i]);
+				}
+			}
+
+			//Display Rows (given result_height)
+			for (j = 0; j < perms.length; j++){
+				
+				var str1 = j.toString();
+				var new_row = document.createElement('div');
+				new_row.id = str1;
+				new_row.className = 'row';
+				document.getElementsByTagName('body')[0].appendChild(new_row);
+
+				//Display Circles a Row (given result_width)
+				for (i = 0; i < n; i++){ //result_width is temp
+					
+					//Add circle
+					var new_circle = document.createElement('div');
+					var temp_string = str1.concat("_");
+					var str2 = i.toString();
+					var circle_string = temp_string.concat(str2);
+					new_circle.id = circle_string;
+					new_circle.className = 'circle';
+					new_row.appendChild(new_circle); //add circle div to row div
+					
+					//Change color according to color array
+					var circle_color = color_array[j][i];
+					switch (circle_color) {
+					    case 0: //White
+					        color_string = "#fff";
+					        break;
+					    case 1: //Blue
+					        color_string = "#00f";
+					        break;
+					    case 2: //Green
+					        color_string = "#0f0";
+					        break;
+					    case 3: //Red
+					        color_string = "#f00";
+					        break;
+					    case 4: //Yellow
+					        color_string = "#ff0";
+					        break;
+					    case 5: //Orange
+					        color_string = "#ffa500";
+					        break;
+					    case 6: //Purple
+					        color_string = "#551a8b";
+					        break;
+					    case 7: //Brown
+					        color_string = "#630";
+					        break;
+					}
+					document.getElementById(circle_string).style.background = color_string;
+
+				}
+
+			}
+
+		}
+
+		function calc_height(n,r){
+			return get_factorial(n)/get_factorial(n-r);
+		}
+
+		function get_factorial(n){
+			if (n == 0) {
+    			x = 1;
+			} else { 
+    			x = n * get_factorial(n-1);
+			}
+			return x;
+		}
+
+		function get_perms(n){
+
+			//Initial permutation
+			var perms = new Array(n);
+			var outsets = new Array(n);
+			for (i = 0; i < n; i++){
+				perms[i] = i.toString();
+			}
+
+			//Initial Conditions
+			var number_of_perms = perms.length;
+    		var start_index = 0;
+    		var end_index = number_of_perms - 1;
+
+    		//Permutation Generator Main Loop
+    		for (k = 0; k < n-1; k++){
+
+    			//get outsets
+			    for (i = start_index; i <= end_index; i++){
+
+			    	var perm = perms[i];
+			    	var outset = new String();
+		            for (j = 0; j < n; j++){
+		                var there = perm.search(j.toString());
+		            	if (there == -1){
+		            		outset = outset += j.toString();
+		            	}
+		      		}	
+		        	outsets[i] = outset;
+
+			    }
+
+			    //for every permutation, make new permutations of length++ 
+			    var next = end_index + 1;
+		        var next_start_index = next;
+		        for (i = start_index; i <= end_index; i++){
+
+		            var number_of_outsets = outsets[i].length;
+		            var perm = perms[i];
+		            var outset = outsets[i];
+
+		            for (j = 0; j < number_of_outsets; j++){
+		                perms[next] = perm.concat(outset[j]);
+		                next = next + 1;
+		            }
+		            
+		            //clear
+		            var perm = new String();
+		            var outset = new String();
+
+		        } 
+		        //set permutation indices for next iteration
+		        var next_end_index = next - 1;
+		        start_index = next_start_index;
+		        end_index = next_end_index;
+
+    		}
+
+			return perms;
+
+		}
+
+		function clearMarbles(){
+			var existingRows = document.getElementsByClassName("row");
+			var numRows = existingRows.length;
+			if (numRows > 0) {
+				for (var h = 0; h < numRows; h++){
+					var currRow = document.getElementById(h.toString());
+					currRow.remove();
+				}
+				document.getElementById("desiredMarbles").value = "";
+			}
+		}
+
+	</script>
+
+</head>
+
+<body>
+
+<h1>The Marble Machine</h1>
+<h3>By Tom Terlecki</h3>
+
+<div id="user_input">
+	<form id="user_form" class="genInstruct" onsubmit="return false;">
+		Generates all permutations of N unique marbles.<br>
+		Select your desired N, the maximum number of marbles.<br>
+		<br>
+		<input id="desiredMarbles" type="text" name="number_of_marbles" onkeypress="if(event.keyCode == 13) document.getElementById('marbGenButton').click()">
+	    <br>
+	</form>
+	<div id="optionButtons">
+		<div class="optionButton"><button id="marbGenButton" type="button" onclick="generateMarbles()">generate marbles</button></div>
+		<div class="optionButton"><button type="button" onclick="clearMarbles()">clear marbles</button></div>
+	</div>
+</div>
+
+</body>
+</html>
