@@ -1,2 +1,5 @@
 # MarbleMachine
-Web page. Generates all possible permutations of N distinct "marbles".
+Generates all possible permutations of N distinct "marbles".
+
+Open the web page marblemachineV3.html in your browser.
+Begin generating!
